@@ -1,5 +1,4 @@
 FROM node:22
-
 RUN apt-get update && apt-get install -y \
     libcairo2-dev \
     libpango1.0-dev \
@@ -8,13 +7,8 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
-
 COPY package.json .
-RUN npm install canvas --ignore-scripts || true
 RUN npm install
-
 COPY . .
-
 CMD ["node", "server.js"]
