@@ -1,15 +1,17 @@
 {
-  "name": "roblox-minecraft-bot",
-  "version": "1.0.0",
-  "description": "Control a Minecraft bot via Roblox",
+  "name": "hux2mcb",
+  "version": "you tell me bro",
+  "description": "mcfun bot but part of the hux4brt series",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "canvas": "^3.2.3",
     "express": "^4.18.2",
+    "http-proxy-middleware": "^3.0.5",
     "mineflayer": "^4.18.0",
-    "prismarine-viewer": "^1.28.0",
+    "prismarine-viewer": "^1.33.0",
     "socket.io": "^4.7.2"
   }
 }
