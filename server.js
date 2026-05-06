@@ -59,6 +59,65 @@ function testConnection(host, port, timeout = 5000) {
 }
 
 // ==========================================
+// CHAT FORMAT
+// ==========================================
+
+function formatMessage(jsonMsg, format = 'roblox') {
+    const colorMap = {
+        '0': { roblox: '#000000', godot: '000000' },
+        '1': { roblox: '#0000AA', godot: '0000AA' },
+        '2': { roblox: '#00AA00', godot: '00AA00' },
+        '3': { roblox: '#00AAAA', godot: '00AAAA' },
+        '4': { roblox: '#AA0000', godot: 'AA0000' },
+        '5': { roblox: '#AA00AA', godot: 'AA00AA' },
+        '6': { roblox: '#FFAA00', godot: 'FFAA00' },
+        '7': { roblox: '#AAAAAA', godot: 'AAAAAA' },
+        '8': { roblox: '#555555', godot: '555555' },
+        '9': { roblox: '#5555FF', godot: '5555FF' },
+        'a': { roblox: '#55FF55', godot: '55FF55' },
+        'b': { roblox: '#55FFFF', godot: '55FFFF' },
+        'c': { roblox: '#FF5555', godot: 'FF5555' },
+        'd': { roblox: '#FF55FF', godot: 'FF55FF' },
+        'e': { roblox: '#FFFF55', godot: 'FFFF55' },
+        'f': { roblox: '#FFFFFF', godot: 'FFFFFF' },
+    }
+
+    const text = jsonMsg.getText ? jsonMsg.getText() : jsonMsg.toString()
+
+    // strip § codes and rebuild with target format
+    let result = ''
+    let i = 0
+    let openTag = false
+
+    while (i < text.length) {
+        if (text[i] === '§' && i + 1 < text.length) {
+            const code = text[i + 1].toLowerCase()
+            if (openTag) {
+                result += format === 'godot' ? '[/color]' : '</font>'
+                openTag = false
+            }
+            if (colorMap[code]) {
+                const color = colorMap[code][format]
+                result += format === 'godot'
+                    ? `[color=#${color}]`
+                    : `<font color="${colorMap[code].roblox}">`
+                openTag = true
+            }
+            i += 2
+        } else {
+            result += text[i]
+            i++
+        }
+    }
+
+    if (openTag) {
+        result += format === 'godot' ? '[/color]' : '</font>'
+    }
+
+    return result
+}
+
+// ==========================================
 // BOT CREATION
 // ==========================================
 
@@ -305,9 +364,10 @@ app.post('/chat', (req, res) => {
 })
 
 app.get('/messages', (req, res) => {
-    const { playerId } = req.query
+    const { playerId, format } = req.query
     if (!playerId) return res.status(400).json({ error: 'playerId required' })
-    res.json({ messages: chatLogs[playerId] || [] })
+    const msgs = (chatLogs[playerId] || []).map(msg => formatMessage(msg, format))
+    res.json({ messages: msgs })
 })
 
 app.get('/inventory', (req, res) => {
