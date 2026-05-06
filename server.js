@@ -10,12 +10,14 @@ const net = require('net')
 const app = express()
 const server = http.createServer(app)
 
+const PORT = process.env.PORT || 3000 // moved him here say hi
+
 const cors = require('cors')
 app.use(cors())
 
 app.use(express.json())
 app.use('/view', createProxyMiddleware({
-    target: 'http://localhost:3001',
+    target: 'http://localhost:' + (PORT+1),
     changeOrigin: true,
     ws: true
 }))
@@ -157,7 +159,7 @@ function createBot(playerId, host, port, username) {
         botStatuses[playerId] = 'connected'
         console.log(`✅ [${playerId}] Spawned!`)
         try {
-            viewerFunc(bot, { port: 3001, firstPerson: true })
+            viewerFunc(bot, { port: parseInt(PORT) + 1, firstPerson: true })
             console.log('Viewer running!')
         } catch (e) {
             console.log('Viewer failed:', e.message)
@@ -385,7 +387,6 @@ app.get('/inventory', (req, res) => {
 // START SERVER
 // ==========================================
 
-const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
