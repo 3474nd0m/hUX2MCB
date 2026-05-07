@@ -36,6 +36,7 @@ const keyStates = {}
 const miningLoops = {}
 const isDiggings = {}
 const intentionalDisconnects = {}
+const viewerServers = {}
 
 function getKeys(playerId) {
     if (!keyStates[playerId]) {
@@ -158,12 +159,14 @@ function createBot(playerId, host, port, username) {
     bot.once('spawn', () => {
         botStatuses[playerId] = 'connected'
         console.log(`✅ [${playerId}] Spawned!`)
-        try {
-            viewerFunc(bot, { port: parseInt(PORT) + 1, firstPerson: true })
-            console.log('Viewer running!')
-        } catch (e) {
-            console.log('Viewer failed:', e.message)
-        }
+		try {
+			const viewer = viewerFunc(bot, { port: parseInt(PORT)+1, firstPerson: true })
+			viewerServers[playerId] = viewer
+			console.log('Viewer running!')
+		} catch (e) {
+			console.log('Viewer failed:', e.message)
+		}	
+
     })
 
     bot.on('error', (err) => {
@@ -180,6 +183,12 @@ function createBot(playerId, host, port, username) {
         bots[playerId] = null
         miningLoops[playerId] = null
         isDiggings[playerId] = false
+        if (viewerServers[playerId]) {
+					try {
+			viewerServers[playerId].close()
+				} catch (e) {}
+			viewerServers[playerId] = null
+		}
         if (!intentionalDisconnects[playerId] && retryCount < MAX_RETRIES) {
             retryCount++
             setTimeout(() => createBot(playerId, lastHosts[playerId], lastPorts[playerId], lastUsernames[playerId]), 5000)
