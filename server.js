@@ -169,10 +169,17 @@ function createBot(playerId, host, port, username) {
 
     })
 
-    bot.on('error', (err) => {
-        botStatuses[playerId] = 'error'
-        console.error(`❌ [${playerId}] Bot error:`, err.message)
-    })
+	bot.on('error', (err) => {
+		botStatuses[playerId] = 'error'
+		console.error(`❌ [${playerId}] Bot error:`, err.message)
+		if (!bots[playerId]) return
+		bots[playerId] = null
+		if (!intentionalDisconnects[playerId] && retryCount < MAX_RETRIES) {
+			retryCount++
+			setTimeout(() => createBot(playerId, lastHosts[playerId], lastPorts[playerId], lastUsernames[playerId]), 10000)
+		}
+	})
+
 
     let retryCount = 0
     const MAX_RETRIES = 3
